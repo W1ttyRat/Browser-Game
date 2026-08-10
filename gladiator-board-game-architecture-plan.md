@@ -6,6 +6,107 @@ This game should be built as a strict separation between a **single authoritativ
 
 The best fit is a **finite state machine** for match flow plus an **event-driven modifier system** for passive Buff Cards, traps, status effects, and map interactions.
 
+If you are building this as a browser game with a Java backend and a React frontend, the recommended split is:
+
+- **Backend**: Java 21 + Spring Boot for authoritative game logic, accounts, saves, matchmaking, and multiplayer synchronization.
+- **Frontend**: React for menus, overlays, HUD, and match UI, with a game renderer such as Phaser 3 or PixiJS for board/battle presentation.
+- **Transport**: REST for account/profile/save operations, WebSocket for live turn updates, combat sync, and lobby state.
+
+---
+
+## 0. Recommended Tech Stack
+
+### Backend Recommendation
+
+Use Spring Boot as the authoritative server if the game will support online multiplayer, persistent saves, leaderboards, or anti-cheat.
+
+Recommended backend responsibilities:
+
+- Validate turns and resolve all authoritative game outcomes.
+- Store player profiles, match history, unlocks, and save data.
+- Host lobby, matchmaking, and reconnect flows.
+- Broadcast turn/combat/event updates to clients over WebSocket.
+- Keep simulation logic deterministic and testable.
+
+### Frontend Recommendation
+
+Use React for the application shell and UI. For the board and combat presentation, either embed Phaser 3 inside React or use a canvas-based renderer and keep React for overlays and menus.
+
+Recommended frontend responsibilities:
+
+- Main menu, character select, buff draft, shop, results, and HUD.
+- Board rendering, tile highlighting, combat UI, and animation state.
+- Local input handling and optimistic UI updates.
+- WebSocket connection handling and reconnection UI.
+
+### Dependency Suggestions
+
+Note: Spring Initializr usually shows user-facing dependency names such as Spring Web, Spring Security, and Spring Data JPA. Those map to actual Maven or Gradle starter artifacts in the generated project.
+
+If a dependency is not visible in the picker, it may still be easy to add manually in Maven or Gradle. That is especially true for third-party libraries like MapStruct.
+
+#### Spring Boot Backend
+
+Core dependencies:
+
+- Spring Web, which generates the spring-boot-starter-web artifact for REST APIs.
+- WebSocket, which generates the spring-boot-starter-websocket artifact for live turn and combat synchronization.
+- Validation, which brings in request and DTO validation support.
+- Spring Security, which generates the security starter for authentication and session protection.
+- Spring Data JPA, which generates the spring-boot-starter-data-jpa artifact for persistence.
+- PostgreSQL Driver, for the primary database connection.
+- Flyway Migration, for versioned database migrations.
+- Lombok, to reduce Java boilerplate if your team is comfortable with it.
+- Spring Boot DevTools, optional for local development only.
+- Spring Boot Test, usually included by default in generated projects as spring-boot-starter-test for unit and integration tests.
+- Testcontainers, for integration tests against real Postgres and other services.
+
+Useful optional dependencies:
+
+- Spring Boot Actuator, for health and metrics.
+- Spring Cache, for catalog and static-content lookups.
+- springdoc-openapi-starter-webmvc-ui, for API documentation.
+- Spring Mail, for account verification or password reset flows.
+- MapStruct is not a Spring Initializr dependency; add it manually in Maven or Gradle if you want DTO mapping.
+
+Recommended Java runtime tools:
+
+- Java 21.
+- Maven or Gradle, with Gradle preferred if you want more flexible build logic.
+
+Artifact note:
+
+- If you use Maven or Gradle directly, the common artifact names are spring-boot-starter-web, spring-boot-starter-websocket, spring-boot-starter-validation, spring-boot-starter-security, spring-boot-starter-data-jpa, and spring-boot-starter-test.
+- If you use Spring Initializr, search for the shorter names first: Web, WebSocket, Validation, Security, Data JPA, PostgreSQL Driver, Flyway Migration, Lombok, Actuator, and Mail.
+- MapStruct is typically added manually after project generation.
+
+#### React Frontend
+
+Core dependencies:
+
+- `react` and `react-dom` - UI framework.
+- `vite` and `@vitejs/plugin-react` - build tooling and fast dev server.
+- `react-router-dom` - route-based navigation for menus and account flows.
+- `zustand` or `@reduxjs/toolkit` - app state management.
+- `@tanstack/react-query` - server state, caching, and request coordination.
+- `socket.io-client` or native WebSocket client - depending on your Spring transport choice.
+- `phaser` or `pixi.js` - board and battle rendering, if you want a real game canvas.
+
+Useful optional dependencies:
+
+- `clsx` - conditional class handling.
+- `framer-motion` - UI transitions and overlays.
+- `zod` - client-side validation for forms and payloads.
+- `howler` - audio playback.
+- `date-fns` - time formatting.
+
+Recommended frontend approach:
+
+- Use React for all non-canvas UI.
+- Use Phaser or PixiJS only for the game board and combat layer.
+- Keep game rules out of React components.
+- Treat the client as a presentation and input layer, not the source of truth.
+
 ---
 
 ## 1. Game State & Event Architecture
@@ -17,6 +118,8 @@ The best fit is a **finite state machine** for match flow plus an **event-driven
 - All random outcomes use a seeded RNG for replay/debugging.
 - Passive buffs are registered at pre-match setup and resolve through event hooks.
 - Every important gameplay action emits a structured event context.
+
+The pseudocode below is engine-agnostic. It describes the simulation model and event flow, even if the production implementation is in Java Spring Boot and React.
 
 ### Turn Flow State Machine
 
@@ -462,13 +565,14 @@ src/
 
 ## 5. Implementation Recommendations
 
-- Use seeded RNG so behavior is reproducible.
-- Make tile resolution idempotent so rewards are not double-applied.
+- Use seeded RNG so behavior is reproducible across both client and server.
+- Make the Spring Boot server authoritative for turn resolution, combat, rewards, and save data.
 - Keep buff logic data-driven instead of hardcoding each passive in scenes.
 - Use explicit phase transitions instead of implicit scene callbacks.
 - Log every resolved event into an `eventLog` for balancing and debugging.
-- Consider Phaser 3 if you want faster scene management and sprite tooling.
-- Consider a custom canvas/WebGL shell if you want maximum control and minimal framework overhead.
+- Use React for menus, overlays, draft screens, inventory, and status panels.
+- Use Phaser 3 or PixiJS only for the board/battle presentation layer if the game needs a dedicated canvas renderer.
+- If multiplayer is in scope, prefer WebSocket sync with REST for account and save management.
 
 ---
 
