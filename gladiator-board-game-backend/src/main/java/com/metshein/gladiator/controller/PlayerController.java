@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -22,9 +24,9 @@ public class PlayerController {
     private final PlayerService playerService;
 
     @GetMapping("players")
-    public String getPlayers() {
-        System.out.println("Getting players");
-        return playerRepository.findAll().toString();
+    public List<Player> getPlayers() {
+        //System.out.println("Getting players");
+        return playerRepository.findAll();
     }
 
     @PostMapping("addPlayer")
