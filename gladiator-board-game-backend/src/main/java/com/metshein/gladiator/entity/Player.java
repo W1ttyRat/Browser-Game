@@ -21,4 +21,6 @@ public class Player {
     @GeneratedValue
     private UUID id;
     private String name;
+    //private int health;
+    
 }

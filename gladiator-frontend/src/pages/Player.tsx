@@ -17,7 +17,7 @@ function Player() {
             <h1>Players</h1>
             <ul>
                 {player.map((player) => (
-                    <li>{player.id}: {player.name}</li>
+                    <li key={player.id}>{player.name}</li>
                 ))}
             </ul>
         </div>
