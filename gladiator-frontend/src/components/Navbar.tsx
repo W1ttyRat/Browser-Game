@@ -5,6 +5,7 @@ export default function Navbar() {
         <div className="nav">
             <Link to="/">Home</Link>
             <Link to="/players">Players</Link>
+            <Link to="/chat">Chat</Link>
         </div>
     )
 }
