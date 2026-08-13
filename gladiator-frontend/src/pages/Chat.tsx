@@ -4,6 +4,7 @@ import { Client } from "@stomp/stompjs";
 import { TextField, Button, List, ListItem, Typography } from "@mui/material";
 import type { ChatMessage } from "../models/ChatMessage.ts";
 
+
 const WebSocketPage = () => {
     const [nickname, setNickname] = useState('');
     const [message, setMessage] = useState('');

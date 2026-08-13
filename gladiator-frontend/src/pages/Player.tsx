@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { PlayerModel } from '../models/PlayerModel.ts'
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://10.10.10.163:8080'
 
 function Player() {
     const [player, setPlayer] = useState<PlayerModel[]>([]);
