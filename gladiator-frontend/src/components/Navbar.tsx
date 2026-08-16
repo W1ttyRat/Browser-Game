@@ -19,7 +19,9 @@ export default function Navbar() {
     });
 
     const data = await res.json();
-    console.log("backend response:", data);
+    const accessToken = data.accessToken;
+
+    sessionStorage.setItem("accessToken", accessToken);
   };
 
   const handleGoogleError = () => {
@@ -36,8 +38,7 @@ export default function Navbar() {
       <GoogleLogin
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleError}
-        useOneTap
-        text="signup_with"
+        text="signin_with"
       />
     </nav>
   );
